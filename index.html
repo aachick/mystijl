@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Stijl</title>
+    <style>
+      html,
+      body {
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      .canvas-wrapper {
+        position: relative; /* Establishes a positioning context for the overlay */
+        display: inline-block; /* Shrinks wrapper to match canvas dimensions */
+      }
+      .canvas-wrapper canvas {
+        display: block; /* Removes extra bottom whitespace */
+        z-index: -1;
+      }
+      .modal-overlay {
+        position: absolute; /* Takes the div out of normal flow to sit on top */
+        top: 20px; /* Position from the top of the canvas */
+        left: 20px; /* Position from the left of the canvas */
+        z-index: 10; /* Ensures the div stays above the canvas */
+        /* Optional: Allow clicks to pass through empty areas of the overlay to the canvas */
+        pointer-events: none;
+        background-color: lightgray;
+        font-family: Arial, Helvetica, sans-serif;
+        border-radius: 5px;
+        box-shadow: 10px 10px;
+        margin: 5rem;
+        padding-left: 1rem;
+      }
+
+      .modal-grid {
+        display: grid;
+        grid-template-columns: auto auto;
+      }
+
+      .modal-grid > div {
+        margin-right: 5rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .hidden {
+        visibility: hidden;
+      }
+
+      .control-panel {
+        position: absolute; /* Takes the div out of normal flow to sit on top */
+        bottom: 10px;
+        left: 0; /* Position from the left of the canvas */
+        right: 0;
+        width: 90%;
+        margin-left: auto;
+        margin-right: auto;
+        z-index: 10; /* Ensures the div stays above the canvas */
+        background-color: lightgray;
+        font-family: Arial, Helvetica, sans-serif;
+        border-radius: 5px;
+        align-items: center;
+        display: grid;
+        grid-template-columns: repeat(9, auto);
+      }
+      .control-panel > div {
+        margin-top: 2px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="canvas-wrapper">
+      <canvas id="myCanvas"></canvas>
+
+      <div class="modal-overlay modal-overlay hidden">
+        <h2>Mydrian tips & tricks</h2>
+        <div class="modal-grid">
+          <div>
+            <img src="static/digit-one-svgrepo-com.svg" height="20rem" />
+            <img src="static/digit-two-svgrepo-com.svg" height="20rem" />
+            <img src="static/digit-three-svgrepo-com.svg" height="20rem" />
+            <img src="static/digit-four-svgrepo-com.svg" height="20rem" />
+            <img src="static/digit-five-svgrepo-com.svg" height="20rem" />
+          </div>
+          <div>
+            Select up to one, two, three, four, of five colors to display in the
+            current layout.
+          </div>
+
+          <div>
+            <img src="static/letter-n-svgrepo-com.svg" height="20rem" />
+          </div>
+          <div>Regenerate lines with the same colors.</div>
+
+          <div>
+            <img src="static/letter-c-svgrepo-com.svg" height="20rem" />
+          </div>
+          <div>Regenerate colors with the same lines.</div>
+
+          <div>
+            <img src="static/letter-p-svgrepo-com.svg" height="20rem" />
+          </div>
+          <div>Play (or pause) an automated color and line updates.</div>
+
+          <div>
+            <img src="static/letter-s-svgrepo-com.svg" height="20rem" />
+          </div>
+          <div>Save the current display to PNG.</div>
+
+          <div>
+            <img src="static/letter-h-svgrepo-com.svg" height="20rem" />
+          </div>
+          <div>Hide/show the help menu.</div>
+        </div>
+      </div>
+
+      <div class="control-panel hidden">
+        <div id="touch-control-1" data-value="1">
+          <img src="static/digit-one-svgrepo-com.svg" height="20rem" />
+        </div>
+        <div id="touch-control-2" data-value="2">
+          <img src="static/digit-two-svgrepo-com.svg" height="20rem" />
+        </div>
+        <div id="touch-control-3" data-value="3">
+          <img src="static/digit-three-svgrepo-com.svg" height="20rem" />
+        </div>
+        <div id="touch-control-4" data-value="4">
+          <img src="static/digit-four-svgrepo-com.svg" height="20rem" />
+        </div>
+        <div id="touch-control-5" data-value="5">
+          <img src="static/digit-five-svgrepo-com.svg" height="20rem" />
+        </div>
+        <div id="touch-control-n">
+          <img src="static/letter-n-svgrepo-com.svg" height="20rem" />
+        </div>
+        <div id="touch-control-c">
+          <img src="static/letter-c-svgrepo-com.svg" height="20rem" />
+        </div>
+        <div id="touch-control-p">
+          <img src="static/letter-p-svgrepo-com.svg" height="20rem" />
+        </div>
+        <div id="touch-control-s">
+          <img src="static/letter-s-svgrepo-com.svg" height="20rem" />
+        </div>
+      </div>
+    </div>
+    <script src="index.js"></script>
+    <script>
+      const isTouchScreen =
+        "ontouchstart" in window ||
+        navigator.maxTouchPoints > 1 ||
+        navigator.msMaxTouchPoints > 0;
+
+      const canvas = initCanvas("myCanvas");
+      const modal = document.querySelector(".modal-overlay");
+
+      function hideModal() {
+        modal.classList.add("hidden");
+        document.removeEventListener("keydown", handleEscClose);
+      }
+
+      function showModal() {
+        modal.classList.remove("hidden");
+        document.addEventListener("keydown", handleEscClose);
+      }
+
+      function handleEscClose(evt) {
+        if (evt.key == "Escape") {
+          hideModal();
+        }
+      }
+
+      function toggleModal() {
+        if (modal.classList.contains("hidden")) {
+          showModal();
+        } else {
+          hideModal();
+        }
+      }
+
+      document.addEventListener("keydown", (evt) => {
+        if (["h", "H"].includes(evt.key)) {
+          toggleModal();
+        }
+      });
+
+      if (!isTouchScreen) {
+        canvas.addEventListener("click", toggleModal);
+      } else {
+        const controlPanel = document.querySelector(".control-panel");
+        controlPanel.classList.remove("hidden");
+
+        ["1", "2", "3", "4", "5"].map((val) => {
+          if (STATE.is_playing) {
+            STATE.is_playing = false;
+            return;
+          }
+          const elem = document.getElementById(`touch-control-${val}`);
+          elem.addEventListener("click", (evt) => {
+            updateColorsForLayout(canvas, val);
+          });
+        });
+
+        document
+          .getElementById("touch-control-n")
+          .addEventListener("click", (evt) => {
+            if (STATE.is_playing) {
+              STATE.is_playing = false;
+              return;
+            }
+            drawCanvas(canvas);
+          });
+
+        document
+          .getElementById("touch-control-c")
+          .addEventListener("click", (evt) => {
+            if (STATE.is_playing) {
+              STATE.is_playing = false;
+              return;
+            }
+            changeColorsForLayout(canvas);
+          });
+
+        document
+          .getElementById("touch-control-p")
+          .addEventListener("click", (evt) => {
+            if (STATE.is_playing) {
+              STATE.is_playing = false;
+              return;
+            }
+            STATE.is_playing = true;
+            automateChanges(canvas);
+          });
+
+        document
+          .getElementById("touch-control-s")
+          .addEventListener("click", (evt) => {
+            saveCanvas(canvas, `myCanvas-image-download-anchor`);
+          });
+      }
+    </script>
+  </body>
+</html>

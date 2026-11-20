@@ -1,0 +1,22 @@
+{
+  "name": "mydrian",
+  "version": "1.0.0",
+  "description": "",
+  "license": "MIT",
+  "author": "Aurélien Chick",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "format": "prettier --write --ignore-unknown .",
+    "format-check": "prettier --check --ignore-unknown .",
+    "lint": "eslint"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.15.0",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.14.0",
+    "prettier": "^3.10.1"
+  }
+}
